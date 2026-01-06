@@ -1,0 +1,679 @@
+/* No font-family set here on purpose (keeps your project’s font). */
+
+:root {
+  --bg: #0b0f14;
+  --text: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.72);
+  --muted2: rgba(255, 255, 255, 0.55);
+
+  --border: rgba(255, 255, 255, 0.10);
+  --card: rgba(255, 255, 255, 0.04);
+
+  /* default accent */
+  --accent: #fb7185;
+  --accentText: #13050a;
+
+  /* default background */
+  --bgGradient: #0b0f14;
+
+  /* glow defaults (RGB parts) */
+  --glowA: 255, 105, 97;
+  --glowB: 255, 194, 102;
+  --glowC: 255, 255, 255;
+}
+
+.app {
+  min-height: 100vh;
+  color: var(--text);
+  background: var(--bgGradient);
+  padding: 36px 18px 72px;
+
+  /* for glow overlay */
+  position: relative;
+  overflow-x: hidden;
+
+  transition: background 600ms ease;
+}
+
+/* Accent glow overlay (adds tint without replacing bgGradient) */
+.app::before {
+  content: "";
+  position: fixed;
+  inset: -40px;
+  pointer-events: none;
+  z-index: 0;
+
+  background:
+    radial-gradient(900px 420px at 18% 14%, rgba(var(--glowA), 0.18), transparent 60%),
+    radial-gradient(900px 520px at 72% 18%, rgba(var(--glowB), 0.14), transparent 60%),
+    radial-gradient(1100px 700px at 62% 82%, rgba(var(--glowC), 0.10), transparent 65%);
+
+  opacity: 1;
+  transition: opacity 600ms ease;
+}
+
+/* Make sure UI stays above glow */
+.app > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ===== mode themes ===== */
+.app.theme-hard {
+  --accent: #7dd3fc;
+  --accentText: #041218;
+
+  --bgGradient:
+    radial-gradient(1200px 600px at 18% 10%, rgba(125, 211, 252, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 90% 20%, rgba(167, 139, 250, 0.12), transparent 60%),
+    #0b0f14;
+
+  --glowA: 140, 240, 190;
+  --glowB: 130, 170, 255;
+  --glowC: 255, 255, 255;
+}
+
+.app.theme-normal {
+  --accent: #fb7185;
+  --accentText: #16060b;
+
+  --bgGradient:
+    radial-gradient(1200px 600px at 18% 10%, rgba(251, 113, 133, 0.18), transparent 55%),
+    radial-gradient(900px 500px at 90% 20%, rgba(244, 63, 94, 0.10), transparent 60%),
+    #0b0f14;
+
+  --glowA: 255, 105, 97;
+  --glowB: 255, 194, 102;
+  --glowC: 255, 255, 255;
+}
+
+.app.theme-soft {
+  --accent: #fbbf24;
+  --accentText: #1a1204;
+
+  --bgGradient:
+    radial-gradient(1200px 600px at 18% 10%, rgba(251, 191, 36, 0.16), transparent 55%),
+    radial-gradient(900px 500px at 90% 20%, rgba(245, 158, 11, 0.10), transparent 60%),
+    #0b0f14;
+
+  --glowA: 255, 193, 120;
+  --glowB: 125, 211, 252;
+  --glowC: 255, 255, 255;
+}
+
+/* ===== custom accent overrides (scoped to .app) ===== */
+.app.accent-tomato { --accent: #fb7185; --accentText: #16060b; --glowA: 255, 90, 90;  --glowB: 255, 190, 120; --glowC: 255, 255, 255; }
+.app.accent-warm   { --accent: #fbbf24; --accentText: #1a1204; --glowA: 255, 188, 120; --glowB: 255, 120, 180; --glowC: 255, 255, 255; }
+.app.accent-gym    { --accent: #57d39c; --accentText: #04140f; --glowA: 120, 255, 190; --glowB: 120, 180, 255; --glowC: 255, 255, 255; }
+.app.accent-night  { --accent: #8b7cff; --accentText: #0e0616; --glowA: 130, 120, 255; --glowB: 90, 200, 255;  --glowC: 255, 255, 255; }
+
+.header {
+  max-width: 1100px;
+  margin: 0 auto 18px;
+}
+.title {
+  margin: 0;
+  font-size: 36px;
+  letter-spacing: -0.02em;
+}
+.subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+}
+
+.main {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.card {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 18px;
+  padding: 18px;
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.35);
+}
+
+/* top bar */
+.topBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.modeGroup {
+  display: inline-flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.modeBtn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.75);
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.modeBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+.modeBtn.active {
+  background: var(--accent);
+  color: var(--accentText);
+}
+
+.rightBar {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.pill, .pillBtn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  border-radius: 14px;
+}
+.pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 8px 10px;
+}
+.pillLabel {
+  font-size: 12px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.pillValue {
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+.pillBtn {
+  padding: 9px 12px;
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+.pillBtn:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+/* grid */
+.contentGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+  margin-top: 10px;
+}
+@media (min-width: 980px) {
+  .contentGrid {
+    grid-template-columns: 1fr 360px;
+    align-items: start;
+  }
+}
+
+.rightPane {
+  position: sticky;
+  top: 18px;
+}
+
+.phase {
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  margin: 8px 0 10px;
+}
+
+.time {
+  font-size: 82px;
+  margin: 0 0 12px;
+  letter-spacing: -0.03em;
+}
+
+.messageBar {
+  margin: 8px 0 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  font-weight: 800;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+
+.btn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 12px 18px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-weight: 850;
+  font-size: 20px;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn.primary {
+  background: var(--accent);
+  color: var(--accentText);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.btn.ghost {
+  background: transparent;
+}
+
+.hint {
+  color: var(--muted);
+  margin: 10px 0 0;
+  line-height: 1.4;
+}
+.hint.meta {
+  margin-top: 8px;
+  opacity: 0.85;
+}
+
+/* cards/panels on right */
+.panel {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 14px;
+}
+.panelTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.panelTitle {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.85);
+}
+.panelHint {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.35;
+  margin-top: 8px;
+}
+
+.panelRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.miniPill {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 850;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.miniPill.on {
+  background: var(--accent);
+  color: var(--accentText);
+  border-color: transparent;
+}
+
+.chip {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 850;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.chip.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.volLabel {
+  color: var(--muted2);
+  font-size: 12px;
+  font-weight: 850;
+}
+.slider {
+  width: 200px;
+}
+
+/* completion */
+.completeCard {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+}
+.completeMsg {
+  font-weight: 900;
+  font-size: 14px;
+}
+.completePts {
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Custom editor grid – prevent overlap */
+.cmGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  align-items: start;
+}
+@media (max-width: 520px) {
+  .cmGrid {
+    grid-template-columns: 1fr;
+  }
+}
+.cmField {
+  min-width: 0;
+}
+.cmField input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border-radius: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--text);
+  outline: none;
+}
+
+.cmAccentRow {
+  display: grid;
+  gap: 8px;
+}
+.cmAccentTitle {
+  font-size: 12px;
+  color: var(--muted2);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+}
+.cmAccentBtns {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Accent pills */
+.cmAccentBtn {
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 900;
+}
+.cmAccentBtn.accent-tomato { box-shadow: inset 0 0 0 1px rgba(251, 113, 133, 0.35); }
+.cmAccentBtn.accent-warm   { box-shadow: inset 0 0 0 1px rgba(251, 191, 36, 0.35); }
+.cmAccentBtn.accent-gym    { box-shadow: inset 0 0 0 1px rgba(87, 211, 156, 0.35); }
+.cmAccentBtn.accent-night  { box-shadow: inset 0 0 0 1px rgba(139, 124, 255, 0.35); }
+.cmAccentBtn.active {
+  background: var(--accent);
+  color: var(--accentText);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.cmActions {
+  display: flex;
+  gap: 10px;
+}
+
+/* footer */
+.footer {
+  max-width: 1100px;
+  margin: 18px auto 0;
+}
+.footerText {
+  color: var(--muted2);
+  font-size: 12px;
+}
+
+/* AUTH MODAL (SYNC) */
+.authOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  z-index: 9999;
+  padding: 18px;
+}
+.authModal {
+  width: min(720px, 92vw);
+  border-radius: 18px;
+  background: rgba(18, 18, 20, 0.88);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 20px 70px rgba(0,0,0,0.55);
+  overflow: hidden;
+}
+.authHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 16px 10px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+}
+.authClose {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.9);
+  cursor: pointer;
+}
+.authBody { padding: 16px; }
+.authInput {
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 12px;
+  padding: 12px 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255,255,255,0.92);
+}
+/* =========================
+   TOAST (short break tip)
+   ========================= */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(15, 18, 22, 0.86);
+  backdrop-filter: blur(10px);
+
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+  max-width: min(680px, 92vw);
+}
+
+.toastText {
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1.2;
+}
+
+.toastBtn {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.toastBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+/* =========================
+   LONG BREAK PROMPT (persistent)
+   ========================= */
+.lbPrompt {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.lbTitle {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.86);
+  margin-bottom: 8px;
+}
+
+.lbText {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.lbActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+/* =========================
+   LONG BREAK PROMPT MODAL (always visible)
+   ========================= */
+.lbOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(10px);
+}
+
+.lbModal {
+  width: min(680px, 92vw);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(15, 18, 22, 0.88);
+  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.60);
+  padding: 16px;
+}
+
+.lbTitle {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.10em;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.86);
+  margin-bottom: 10px;
+}
+
+.lbText {
+  color: rgba(255, 255, 255, 0.84);
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.lbActions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.kbdHint {
+  margin-left: 6px;
+  opacity: 0.9;
+  font-weight: 800;
+}
+
+.shortcutList {
+  display: grid;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.shortcutRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.08);
+  background: rgba(255,255,255,0.04);
+}
+
+.kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-weight: 800;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(0,0,0,0.25);
+  min-width: 64px;
+  text-align: center;
+}
