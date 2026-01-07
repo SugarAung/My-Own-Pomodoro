@@ -22,11 +22,25 @@
   --glowC: 255, 255, 255;
 }
 
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .app {
   min-height: 100vh;
+  min-height: 100dvh;
   color: var(--text);
   background: var(--bgGradient);
-  padding: 36px 18px 72px;
+
+  /* safe area bottom helps iPhone home bar */
+  padding: 36px 18px calc(72px + env(safe-area-inset-bottom));
 
   /* for glow overlay */
   position: relative;
@@ -111,11 +125,13 @@
   max-width: 1100px;
   margin: 0 auto 18px;
 }
+
 .title {
   margin: 0;
   font-size: 36px;
   letter-spacing: -0.02em;
 }
+
 .subtitle {
   margin: 8px 0 0;
   color: var(--muted);
@@ -141,6 +157,9 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 14px;
+
+  /* important for small screens */
+  flex-wrap: wrap;
 }
 
 .modeGroup {
@@ -150,6 +169,10 @@
   border-radius: 14px;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
+
+  /* important for small screens */
+  flex-wrap: wrap;
+  max-width: 100%;
 }
 
 .modeBtn {
@@ -225,7 +248,7 @@
 }
 @media (min-width: 980px) {
   .contentGrid {
-    grid-template-columns: 1fr 360px;
+    grid-template-columns: 1fr minmax(320px, 360px);
     align-items: start;
   }
 }
@@ -233,6 +256,12 @@
 .rightPane {
   position: sticky;
   top: 18px;
+}
+@media (max-width: 980px) {
+  .rightPane {
+    position: static;
+    top: auto;
+  }
 }
 
 .phase {
@@ -244,7 +273,8 @@
 }
 
 .time {
-  font-size: 82px;
+  font-size: clamp(44px, 10vw, 82px);
+  line-height: 1;
   margin: 0 0 12px;
   letter-spacing: -0.03em;
 }
@@ -373,7 +403,7 @@
   font-weight: 850;
 }
 .slider {
-  width: 200px;
+  width: min(320px, 100%);
 }
 
 /* completion */
@@ -510,6 +540,7 @@
   cursor: pointer;
 }
 .authBody { padding: 16px; }
+
 .authInput {
   width: 100%;
   box-sizing: border-box;
@@ -519,13 +550,20 @@
   background: rgba(0, 0, 0, 0.25);
   color: rgba(255,255,255,0.92);
 }
+
+/* prevents super long emails/ids from breaking layout */
+.authValue {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
 /* =========================
    TOAST (short break tip)
    ========================= */
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 18px;
+  bottom: calc(18px + env(safe-area-inset-bottom));
   transform: translateX(-50%);
   z-index: 9998;
   display: flex;
@@ -676,4 +714,19 @@
   background: rgba(0,0,0,0.25);
   min-width: 64px;
   text-align: center;
+}
+
+/* extra safety: buttons never overflow */
+.modeBtn,
+.pillBtn,
+.btn,
+.chip {
+  max-width: 100%;
+}
+
+@media (max-width: 520px) {
+  .app { padding: 18px 12px calc(56px + env(safe-area-inset-bottom)); }
+  .card { padding: 14px; }
+  .title { font-size: 26px; }
+  .btn { font-size: 16px; padding: 11px 14px; }
 }
