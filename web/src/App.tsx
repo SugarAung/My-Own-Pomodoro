@@ -130,7 +130,6 @@ export default function App() {
   }
 
   function pickLongIdea() {
-    // ✅ custom reminders only affect long breaks when mode === "custom"
     const useCustom = mode === "custom" && customReminders.length > 0;
     const source = useCustom ? customReminders : DEFAULT_LONG_BREAK_IDEAS;
 
@@ -177,28 +176,27 @@ export default function App() {
   ]);
 
   /** ===== Auth init ===== */
+  useEffect(() => {
+    if (!hasSupabaseEnv || !supabase) {
+      setUser(null);
+      setSession(null);
+      return;
+    }
 
-useEffect(() => {
-  if (!hasSupabaseEnv || !supabase) {
-    setUser(null);
-    setSession(null);
-    return;
-  }
+    const sb = supabase; // narrowed
 
-  supabase.auth.getSession().then(({ data }) => {
-    setSession(data.session ?? null);
-    setUser(data.session?.user ?? null);
-  });
+    sb.auth.getSession().then(({ data }) => {
+      setSession(data.session ?? null);
+      setUser(data.session?.user ?? null);
+    });
 
-  const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
-    setSession(newSession ?? null);
-    setUser(newSession?.user ?? null);
-  });
+    const { data: sub } = sb.auth.onAuthStateChange((_event, newSession) => {
+      setSession(newSession ?? null);
+      setUser(newSession?.user ?? null);
+    });
 
-  return () => sub.subscription.unsubscribe();
-}, []);
-
-
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   /** ===== Cloud load ===== */
   useEffect(() => {
@@ -206,8 +204,6 @@ useEffect(() => {
       if (!user) {
         setCustomMode(null);
         setCloudStatus(null);
-
-        // If logged out while in custom mode, safely return to normal.
         setMode((m) => (m === "custom" ? "normal" : m));
         return;
       }
@@ -410,7 +406,6 @@ useEffect(() => {
       return;
     }
 
-    // skipping a break => back to focus
     setPhase("focus");
     setRemainingSec(phaseDurationSec("focus", modeConfig));
     setSessionMessage("Skipped break. Back to focus when you’re ready.");
@@ -435,9 +430,7 @@ useEffect(() => {
         e.preventDefault();
         setShowShortcuts(true);
       }
-      if (e.key === "Escape") {
-        setShowShortcuts(false);
-      }
+      if (e.key === "Escape") setShowShortcuts(false);
     }
 
     window.addEventListener("keydown", onKeyDown);
@@ -464,13 +457,14 @@ useEffect(() => {
   }
 
   async function saveCustomEdits() {
-  if (!user || !customMode) return;
+    if (!user || !customMode) return;
 
-  // Supabase is optional in production builds
-  if (!supabase) {
-    setCloudStatus("Sync is not configured (missing Supabase env vars).");
-    return;
-  }
+    if (!hasSupabaseEnv || !supabase) {
+      setCloudStatus("Sync is not configured (missing Supabase env vars).");
+      return;
+    }
+
+    const sb = supabase; // narrowed
 
     setCloudBusy(true);
     setCloudStatus(null);
@@ -484,7 +478,7 @@ useEffect(() => {
         accent_color: cmDraftAccent,
       };
 
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from("custom_mode")
         .update(payload)
         .eq("user_id", user.id)
@@ -511,7 +505,6 @@ useEffect(() => {
   /** ===== Theme classes ===== */
   const themeClass = `theme-${effectiveModeKey}`;
 
-  // Use DRAFT accent while in custom mode so user sees instant preview
   const liveAccent: AccentKey =
     mode === "custom" ? cmDraftAccent : ((customMode?.accent_color as AccentKey) || "tomato");
 
@@ -529,7 +522,12 @@ useEffect(() => {
           <div className="topBar">
             <div className="modeGroup" aria-label="Mode selection">
               {(["soft", "normal", "hard"] as ModeKey[]).map((m) => (
-                <button key={m} className={`modeBtn ${mode === m ? "active" : ""}`} type="button" onClick={() => setMode(m)}>
+                <button
+                  key={m}
+                  className={`modeBtn ${mode === m ? "active" : ""}`}
+                  type="button"
+                  onClick={() => setMode(m)}
+                >
                   {MODES[m].label}
                 </button>
               ))}
@@ -547,7 +545,12 @@ useEffect(() => {
             </div>
 
             <div className="rightBar">
-              <button className="pillBtn" type="button" onClick={() => setShowShortcuts(true)} title="Keyboard shortcuts (?)">
+              <button
+                className="pillBtn"
+                type="button"
+                onClick={() => setShowShortcuts(true)}
+                title="Keyboard shortcuts (?)"
+              >
                 SHORTCUTS <span className="kbdHint">?</span>
               </button>
 
@@ -568,7 +571,11 @@ useEffect(() => {
                 </button>
               )}
 
-              <button className="pillBtn" type="button" onClick={() => setUiMode((u) => (u === "dashboard" ? "minimal" : "dashboard"))}>
+              <button
+                className="pillBtn"
+                type="button"
+                onClick={() => setUiMode((u) => (u === "dashboard" ? "minimal" : "dashboard"))}
+              >
                 {showDashboard ? "Minimal" : "Dashboard"}
               </button>
             </div>
@@ -616,28 +623,52 @@ useEffect(() => {
                 <div className="panel">
                   <div className="panelTop">
                     <div className="panelTitle">Ambience</div>
-                    <button className={`miniPill ${ambienceEnabled ? "on" : ""}`} type="button" onClick={() => setAmbienceEnabled((v) => !v)}>
+                    <button
+                      className={`miniPill ${ambienceEnabled ? "on" : ""}`}
+                      type="button"
+                      onClick={() => setAmbienceEnabled((v) => !v)}
+                    >
                       {ambienceEnabled ? "On" : "Off"}
                     </button>
                   </div>
 
                   <div className="panelRow">
-                    <button className={`chip ${ambienceType === "rain" ? "active" : ""}`} onClick={() => setAmbienceType("rain")} type="button">
+                    <button
+                      className={`chip ${ambienceType === "rain" ? "active" : ""}`}
+                      onClick={() => setAmbienceType("rain")}
+                      type="button"
+                    >
                       Rain
                     </button>
-                    <button className={`chip ${ambienceType === "night" ? "active" : ""}`} onClick={() => setAmbienceType("night")} type="button">
+                    <button
+                      className={`chip ${ambienceType === "night" ? "active" : ""}`}
+                      onClick={() => setAmbienceType("night")}
+                      type="button"
+                    >
                       Night
                     </button>
-                    <button className={`chip ${ambienceType === "white" ? "active" : ""}`} onClick={() => setAmbienceType("white")} type="button">
+                    <button
+                      className={`chip ${ambienceType === "white" ? "active" : ""}`}
+                      onClick={() => setAmbienceType("white")}
+                      type="button"
+                    >
                       White
                     </button>
                   </div>
 
                   <div className="panelRow">
-                    <button className={`chip ${ambiencePlayMode === "focus" ? "active" : ""}`} onClick={() => setAmbiencePlayMode("focus")} type="button">
+                    <button
+                      className={`chip ${ambiencePlayMode === "focus" ? "active" : ""}`}
+                      onClick={() => setAmbiencePlayMode("focus")}
+                      type="button"
+                    >
                       Focus only
                     </button>
-                    <button className={`chip ${ambiencePlayMode === "always" ? "active" : ""}`} onClick={() => setAmbiencePlayMode("always")} type="button">
+                    <button
+                      className={`chip ${ambiencePlayMode === "always" ? "active" : ""}`}
+                      onClick={() => setAmbiencePlayMode("always")}
+                      type="button"
+                    >
                       Always
                     </button>
                   </div>

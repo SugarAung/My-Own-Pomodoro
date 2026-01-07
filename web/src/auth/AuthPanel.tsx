@@ -18,6 +18,7 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
     if (!open) {
       setStatus(null);
       setBusy(false);
+      setEmail("");
     }
   }, [open]);
 
@@ -37,7 +38,8 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
 
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const sb = supabase; // narrowed
+      const { error } = await sb.auth.signInWithOtp({
         email: trimmed,
         options: {
           emailRedirectTo: window.location.origin,
@@ -45,7 +47,6 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
       });
 
       if (error) throw error;
-
       setStatus("✅ Magic link sent. Check your inbox (and spam).");
     } catch (e: any) {
       setStatus(e?.message ?? "Something went wrong.");
@@ -58,13 +59,14 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
     setStatus(null);
 
     if (!hasSupabaseEnv || !supabase) {
-      setStatus("Sync is not configured.");
+      setStatus("Sync is not configured (missing Supabase env vars).");
       return;
     }
 
     setBusy(true);
     try {
-      const { error } = await supabase.auth.signOut();
+      const sb = supabase; // narrowed
+      const { error } = await sb.auth.signOut();
       if (error) throw error;
       setStatus("Signed out.");
     } catch (e: any) {
@@ -76,34 +78,40 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
 
   if (!open) return null;
 
+  const syncAvailable = hasSupabaseEnv && !!supabase;
+
   return (
     <div className="authOverlay" role="dialog" aria-modal="true" aria-label="Sync login">
       <div className="authModal">
         <div className="authHeader">
           <div>
             <div className="authTitle">Sync (optional)</div>
-            <div className="authSubtitle">
-              Sign in to sync your Custom mode across devices.
-            </div>
+            <div className="authSubtitle">Sign in to sync your Custom mode across devices.</div>
           </div>
-          <button
-            className="authClose"
-            type="button"
-            onClick={onClose}
-            aria-label="Close"
-          >
+          <button className="authClose" type="button" onClick={onClose} aria-label="Close">
             ✕
           </button>
         </div>
 
-        {user ? (
+        {!syncAvailable ? (
+          <div className="authBody">
+            <p className="authText">
+              Sync is disabled because Supabase environment variables are missing.
+              <br />
+              The app still works fully in guest mode.
+            </p>
+            <div className="authActions">
+              <button className="btn primary" type="button" onClick={onClose}>
+                OK
+              </button>
+            </div>
+          </div>
+        ) : user ? (
           <div className="authBody">
             <div className="authInfo">
               <div className="authLabel">Signed in as</div>
               <div className="authValue">{user.email ?? user.id}</div>
-              <div className="authHint">
-                {session ? "Session active." : "No session."}
-              </div>
+              <div className="authHint">{session ? "Session active." : "No session."}</div>
             </div>
 
             <div className="authActions">
@@ -118,8 +126,7 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
         ) : (
           <div className="authBody">
             <p className="authText">
-              Guest mode works fully. If you want to sync your settings, use an
-              email magic link.
+              Guest mode works fully. If you want to sync your settings, use an email magic link.
             </p>
 
             <label className="authField">
@@ -138,12 +145,7 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
               <button className="btn" type="button" onClick={onClose}>
                 Not now
               </button>
-              <button
-                className="btn primary"
-                type="button"
-                onClick={sendMagicLink}
-                disabled={busy}
-              >
+              <button className="btn primary" type="button" onClick={sendMagicLink} disabled={busy}>
                 {busy ? "Sending..." : "Send magic link"}
               </button>
             </div>
