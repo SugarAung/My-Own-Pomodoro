@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "../lib/supabaseClient";
+import { hasSupabaseEnv, supabase } from "../lib/supabaseClient";
 import type { Session, User } from "@supabase/supabase-js";
 
 type Props = {
@@ -23,6 +23,11 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
 
   async function sendMagicLink() {
     setStatus(null);
+
+    if (!hasSupabaseEnv || !supabase) {
+      setStatus("Sync is not configured (missing Supabase env vars).");
+      return;
+    }
 
     const trimmed = email.trim().toLowerCase();
     if (!trimmed || !trimmed.includes("@")) {
@@ -51,6 +56,12 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
 
   async function signOut() {
     setStatus(null);
+
+    if (!hasSupabaseEnv || !supabase) {
+      setStatus("Sync is not configured.");
+      return;
+    }
+
     setBusy(true);
     try {
       const { error } = await supabase.auth.signOut();
@@ -71,9 +82,16 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
         <div className="authHeader">
           <div>
             <div className="authTitle">Sync (optional)</div>
-            <div className="authSubtitle">Sign in to sync your Custom mode across devices.</div>
+            <div className="authSubtitle">
+              Sign in to sync your Custom mode across devices.
+            </div>
           </div>
-          <button className="authClose" type="button" onClick={onClose} aria-label="Close">
+          <button
+            className="authClose"
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+          >
             ✕
           </button>
         </div>
@@ -83,7 +101,9 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
             <div className="authInfo">
               <div className="authLabel">Signed in as</div>
               <div className="authValue">{user.email ?? user.id}</div>
-              <div className="authHint">{session ? "Session active." : "No session."}</div>
+              <div className="authHint">
+                {session ? "Session active." : "No session."}
+              </div>
             </div>
 
             <div className="authActions">
@@ -98,7 +118,8 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
         ) : (
           <div className="authBody">
             <p className="authText">
-              Guest mode works fully. If you want to sync your settings, use an email magic link.
+              Guest mode works fully. If you want to sync your settings, use an
+              email magic link.
             </p>
 
             <label className="authField">
@@ -117,7 +138,12 @@ export default function AuthPanel({ open, onClose, user, session }: Props) {
               <button className="btn" type="button" onClick={onClose}>
                 Not now
               </button>
-              <button className="btn primary" type="button" onClick={sendMagicLink} disabled={busy}>
+              <button
+                className="btn primary"
+                type="button"
+                onClick={sendMagicLink}
+                disabled={busy}
+              >
                 {busy ? "Sending..." : "Send magic link"}
               </button>
             </div>

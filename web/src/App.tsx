@@ -9,7 +9,8 @@ import { loadSettings, saveSettings, type UiMode } from "./core/storage";
 import { useSound, type AmbiencePlayMode, type AmbienceType } from "./core/sound";
 import { useKeyboardShortcuts } from "./core/keyboard";
 
-import { supabase } from "./lib/supabaseClient";
+import { hasSupabaseEnv, supabase } from "./lib/supabaseClient";
+
 import AuthPanel from "./auth/AuthPanel";
 import type { Session, User } from "@supabase/supabase-js";
 
@@ -176,19 +177,28 @@ export default function App() {
   ]);
 
   /** ===== Auth init ===== */
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session ?? null);
-      setUser(data.session?.user ?? null);
-    });
 
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
-      setSession(newSession ?? null);
-      setUser(newSession?.user ?? null);
-    });
+useEffect(() => {
+  if (!hasSupabaseEnv || !supabase) {
+    setUser(null);
+    setSession(null);
+    return;
+  }
 
-    return () => sub.subscription.unsubscribe();
-  }, []);
+  supabase.auth.getSession().then(({ data }) => {
+    setSession(data.session ?? null);
+    setUser(data.session?.user ?? null);
+  });
+
+  const { data: sub } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    setSession(newSession ?? null);
+    setUser(newSession?.user ?? null);
+  });
+
+  return () => sub.subscription.unsubscribe();
+}, []);
+
+
 
   /** ===== Cloud load ===== */
   useEffect(() => {
@@ -454,12 +464,13 @@ export default function App() {
   }
 
   async function saveCustomEdits() {
-    if (!user || !customMode) return;
+  if (!user || !customMode) return;
 
-    if (isRunning) {
-      setCloudStatus("Pause the timer before saving your custom settings.");
-      return;
-    }
+  // Supabase is optional in production builds
+  if (!supabase) {
+    setCloudStatus("Sync is not configured (missing Supabase env vars).");
+    return;
+  }
 
     setCloudBusy(true);
     setCloudStatus(null);
@@ -843,7 +854,7 @@ export default function App() {
               <div className="authBody">
                 <div className="shortcutList">
                   <div className="shortcutRow">
-                    <span classNamespan className="kbd">Space</span>
+                    <span className="kbd">Space</span>
                     <span>Start / Pause</span>
                   </div>
                   <div className="shortcutRow">
