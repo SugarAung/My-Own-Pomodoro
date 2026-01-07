@@ -1,5 +1,7 @@
 # My Own Pomodoro 🍅
 
+🔗 **Live app:** [https://my-own-pomodoro-alh.vercel.app/](https://my-own-pomodoro-alh.vercel.app/)
+
 A calm, customizable Pomodoro timer built for **focus without pressure**.
 
 This project is not about productivity guilt, points, or streaks.  
